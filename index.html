@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUNAGEM AVANÇADA BENNYS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        #panel {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #panel:hover {
+            background-color: #f7f7f7;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .vehicle-selector {
+            width: 97%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .vehicle-selector:hover {
+            background-color: #f0f0f0;
+        }
+
+        .vehicle-list {
+            display: none;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .vehicle-item {
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .vehicle-item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .vehicle-item.selected {
+            background-color: #cce5ff;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 97%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+        }
+
+        .total {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .quantity-input {
+            width: 120px;
+            padding: 5px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #reset-button {
+            background-color: #f44336;
+        }
+
+        #reset-button:hover {
+            background-color: #d32f2f;
+			
+			button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+        }
+    </style>
+</head>
+<body>
+    <div id="panel">
+        <h1>TUNAGEM AVANÇADA BENNYS</h1>
+
+        <!-- Campo de pesquisa -->
+        <input type="text" id="vehicle-search" placeholder="Pesquisar veículo...">
+        
+        <div class="vehicle-selector" id="vehicle-selector">
+            <span>Clique aqui para escolher seu veículo</span>
+        </div>
+        
+        <div class="vehicle-list" id="vehicle-list">
+            <!-- Lista de veículos será carregada dinamicamente -->
+        </div>
+    </div>
+
+    <div id="setup-container" style="display: none;">
+        <h2 id="vehicle-name"></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Serviço</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="setup-table">
+                <!-- Tabela de setup será carregada dinamicamente -->
+            </tbody>
+        </table>
+
+        <p class="total">Valor Total: R$ <span id="total-value">0.00</span></p>
+        <div class="button-container">
+            <button id="alter-vehicle">Alterar Veículo</button>
+            <button id="reset-button">Resetar</button>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos veículos e seus setups
+const vehicles = [
+    {
+        name: "HELICÓPTERO HAVOK",
+        setup: [
+            { service: "MOTOR", price: 70000, quantity: 0 },
+            { service: "FREIO", price: 70000, quantity: 0 },
+            { service: "TURBO", price: 70000, quantity: 0 },
+            { service: "INSULFILM", price: 35000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 35000, quantity: 0 },
+            { service: "XENON", price: 35000, quantity: 0 },
+            { service: "ADESIVOS (DECALS)", price: 35000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 35000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "HELICÓPTERO VOLATUS",
+        setup: [
+            { service: "TURBO", price: 65000, quantity: 0 },
+            { service: "INSUFILM", price: 35000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 65000, quantity: 0 },
+            { service: "RODA", price: 35000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 65000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "JATINHO",
+        setup: [
+            { service: "ADESIVO", price: 65000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 65000, quantity: 0 },
+            { service: "INSUFILM", price: 55000, quantity: 0 },
+            { service: "XENON", price: 45000, quantity: 0 },
+            { service: "RODA", price: 45000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 65000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "YATCH 2",
+        setup: [
+            { service: "PINTURA", price: 105000, quantity: 0 },
+            { service: "XENON", price: 105000, quantity: 0 },
+            { service: "TURBO", price: 65000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 105000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "MICRO AVIÃO",
+        setup: [
+            { service: "PINTURA", price: 35000, quantity: 0 },
+            { service: "DECAL", price: 35000, quantity: 0 },
+            { service: "ESCAPAMENTO", price: 15000, quantity: 0 },
+            { service: "RODA", price: 20000, quantity: 0 },
+            { service: "MOTOR", price: 65000, quantity: 0 },
+            { service: "FREIO", price: 65000, quantity: 0 },
+            { service: "TURBO", price: 65000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 35000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "AVIÃO DE ACROBACIA",
+        setup: [
+            { service: "PINTURA", price: 35000, quantity: 0 },
+            { service: "DECAL", price: 35000, quantity: 0 },
+            { service: "INSUFILM", price: 35000, quantity: 0 },
+            { service: "XENON", price: 35000, quantity: 0 },
+            { service: "NEON", price: 35000, quantity: 0 },
+            { service: "RODA", price: 35000, quantity: 0 },
+            { service: "MOTOR", price: 65000, quantity: 0 },
+            { service: "FREIO", price: 65000, quantity: 0 },
+            { service: "TURBO", price: 65000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 35000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "HELICÓPTERO SEASPARROW2",
+        setup: [
+            { service: "MOTOR", price: 70000, quantity: 0 },
+            { service: "FREIO", price: 70000, quantity: 0 },
+            { service: "TURBO", price: 70000, quantity: 0 },
+            { service: "INSUFILM", price: 35000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 35000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 35000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "HELICÓPTERO PAVELOW",
+        setup: [
+            { service: "MOTOR", price: 70000, quantity: 0 },
+            { service: "FREIO", price: 70000, quantity: 0 },
+            { service: "TRANSMISSÃO (CASO INSISTAM)", price: 70000, quantity: 0 },
+            { service: "SUSPENSÃO (CASO INSISTAM)", price: 70000, quantity: 0 },
+            { service: "TURBO", price: 70000, quantity: 0 },
+            { service: "INSUFILM", price: 35000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 65000, quantity: 0 },
+            { service: "RODA", price: 40000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 65000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "HELICÓPTERO FROGGER",
+        setup: [
+            { service: "MOTOR", price: 105000, quantity: 0 },
+            { service: "FREIO", price: 105000, quantity: 0 },
+            { service: "TURBO", price: 105000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 55000, quantity: 0 },
+            { service: "INSUFILM", price: 55000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 55000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "TANQUE DE GUERRA",
+        setup: [
+            { service: "ESTÉTICA", price: 20000, quantity: 0 },
+            { service: "MOTOR", price: 55000, quantity: 0 },
+            { service: "PINTURA", price: 55000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 55000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+    {
+        name: "MOCHILA A JATO",
+        setup: [
+            { service: "MOTOR", price: 55000, quantity: 0 },
+            { service: "FREIO", price: 55000, quantity: 0 },
+            { service: "TURBO", price: 55000, quantity: 0 },
+            { service: "ESTÉTICA", price: 20000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 55000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+	{
+        name: "CARRO DE FÓRMULA 1",
+        setup: [
+            { service: "ESTÉTICA", price: 20000, quantity: 0 },
+            { service: "MOTOR", price: 55000, quantity: 0 },
+            { service: "FREIO", price: 55000, quantity: 0 },
+            { service: "TURBO", price: 55000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 55000, quantity: 0 },
+			{ service: "RODA", price: 55000, quantity: 0 },
+			{ service: "COR 1ª + COR 2ª + PEROLADO", price: 55000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+	{
+        name: "CARGOBOB",
+        setup: [
+            { service: "MOTOR", price: 105000, quantity: 0 },
+            { service: "FREIO", price: 105000, quantity: 0 },
+            { service: "TRANSMISSÃO (CASO INSISTAM)", price: 105000, quantity: 0 },
+            { service: "SUSPENSÃO (CASO INSISTAM)", price: 105000, quantity: 0 },
+            { service: "TURBO", price: 105000, quantity: 0 },
+			{ service: "ESTÉTICA", price: 85000, quantity: 0 },
+			{ service: "PINTURA (TODAS AS CORES)", price: 85000, quantity: 0 },
+			{ service: "RODA", price: 85000, quantity: 0 },
+			{ service: "COR 1ª + COR 2ª + PEROLADO", price: 85000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+	{
+        name: "BUZARD2",
+        setup: [
+            { service: "TURBO", price: 70000, quantity: 0 },
+            { service: "ESTÉTICA", price: 15000, quantity: 0 },
+            { service: "PINTURA (TODAS AS CORES)", price: 55000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 55000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    },
+	{
+        name: "HELICÓPTERO AS350",
+        setup: [
+            { service: "MOTOR", price: 70000, quantity: 0 },
+            { service: "FREIO", price: 70000, quantity: 0 },
+            { service: "TRANSMISSÃO", price: 70000, quantity: 0 },
+            { service: "SUSPENSÃO (CASO INSISTAM)", price: 70000, quantity: 0 },
+            { service: "TURBO", price: 70000, quantity: 0 },
+			{ service: "INSUFILM", price: 35000, quantity: 0 },
+			{ service: "PINTURA (TODAS AS CORES)", price: 65000, quantity: 0 },
+            { service: "COR 1ª + COR 2ª + PEROLADO", price: 65000, quantity: 0 },
+            { service: "VALOR DA MÁQUINA", price: 1, quantity: 0, isDuplicated: true }
+        ]
+    }
+];
+
+
+
+
+
+
+
+
+
+
+        // Referências aos elementos do DOM
+        const vehicleSelector = document.getElementById("vehicle-selector");
+        const vehicleList = document.getElementById("vehicle-list");
+        const setupContainer = document.getElementById("setup-container");
+        const setupTable = document.getElementById("setup-table");
+        const totalValue = document.getElementById("total-value");
+        const alterVehicleButton = document.getElementById("alter-vehicle");
+        const resetButton = document.getElementById("reset-button");
+        const vehicleName = document.getElementById("vehicle-name");
+        const vehicleSearch = document.getElementById("vehicle-search");
+
+        // Função para formatar valores em moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+            }).format(value);
+        }
+
+        // Exibir a lista de veículos com filtro de pesquisa
+        vehicleSearch.addEventListener("input", () => {
+            const query = vehicleSearch.value.toLowerCase();
+            updateVehicleList(query);
+        });
+
+        // Função para atualizar a lista de veículos
+        function updateVehicleList(query) {
+            vehicleList.innerHTML = '';
+            vehicles.filter(vehicle => vehicle.name.toLowerCase().includes(query)).forEach(vehicle => {
+                const vehicleElement = document.createElement("div");
+                vehicleElement.classList.add("vehicle-item");
+                vehicleElement.textContent = vehicle.name;
+
+                vehicleElement.addEventListener("click", () => {
+                    showSetup(vehicle);
+                });
+
+                vehicleList.appendChild(vehicleElement);
+            });
+            vehicleList.style.display = "block"; // Mostrar lista de veículos
+        }
+
+        // Mostrar os detalhes do setup do veículo
+        function showSetup(vehicle) {
+            vehicleName.textContent = vehicle.name;
+            setupTable.innerHTML = "";
+
+            vehicle.setup.forEach(service => {
+                const row = document.createElement("tr");
+
+                const serviceCell = document.createElement("td");
+                serviceCell.textContent = service.service;
+                row.appendChild(serviceCell);
+
+                const priceCell = document.createElement("td");
+                priceCell.textContent = formatCurrency(service.price);
+                row.appendChild(priceCell);
+
+const quantityCell = document.createElement("td");
+const quantityContainer = document.createElement("div");
+quantityContainer.style.display = "flex";
+quantityContainer.style.alignItems = "center";
+quantityContainer.style.justifyContent = "space-between";
+
+// Botão "-"
+const decreaseButton = document.createElement("button");
+decreaseButton.textContent = "-";
+decreaseButton.style.padding = "5px";
+decreaseButton.style.marginRight = "5px";
+decreaseButton.addEventListener("click", () => {
+    if (service.quantity > 0) {
+        service.quantity--;
+        quantityInput.value = service.quantity;
+        updateTotal();
+    }
+});
+
+// Campo de entrada de quantidade
+const quantityInput = document.createElement("input");
+quantityInput.type = "number";
+quantityInput.value = service.quantity;
+quantityInput.min = "0";
+quantityInput.style.width = "80px";
+quantityInput.style.textAlign = "center";
+quantityInput.classList.add("quantity-input");
+quantityInput.addEventListener("input", () => {
+    service.quantity = parseInt(quantityInput.value) || 0;
+    updateTotal();
+});
+
+// Botão "+"
+const increaseButton = document.createElement("button");
+increaseButton.textContent = "+";
+increaseButton.style.padding = "5px";
+increaseButton.style.marginLeft = "5px";
+increaseButton.addEventListener("click", () => {
+    service.quantity++;
+    quantityInput.value = service.quantity;
+    updateTotal();
+});
+
+// Montar o container
+quantityContainer.appendChild(decreaseButton);
+quantityContainer.appendChild(quantityInput);
+quantityContainer.appendChild(increaseButton);
+
+quantityCell.appendChild(quantityContainer);
+row.appendChild(quantityCell);
+;
+
+                const totalCell = document.createElement("td");
+                const total = service.price * service.quantity; // Calcular o total para o serviço
+                totalCell.textContent = formatCurrency(total);
+                row.appendChild(totalCell);
+
+                setupTable.appendChild(row);
+            });
+
+            updateTotal();
+
+            setupContainer.style.display = "block";
+            vehicleSelector.style.display = "none";
+            vehicleList.style.display = "none";
+        }
+
+        // Atualizar o valor total geral
+        function updateTotal() {
+            let total = 0;
+            const rows = setupTable.getElementsByTagName("tr");
+
+            for (let row of rows) {
+                const quantityInput = row.querySelector(".quantity-input");
+                const priceCell = row.querySelector("td:nth-child(2)");
+                const price = parseFloat(priceCell.textContent.replace('R$', '').replace('.', '').replace(',', '.'));
+
+                const quantity = parseInt(quantityInput.value);
+                const totalForRow = price * quantity;
+
+                total += totalForRow;
+
+                // Atualiza o total na célula "Total" para cada serviço
+                row.querySelector("td:nth-child(4)").textContent = formatCurrency(totalForRow);
+            }
+
+            totalValue.textContent = formatCurrency(total);
+        }
+
+        // Alterar o veículo selecionado
+        alterVehicleButton.addEventListener("click", () => {
+            setupContainer.style.display = "none";
+            vehicleSelector.style.display = "block";
+            vehicleList.style.display = "block";
+        });
+
+        // Resetar os valores da tabela
+        resetButton.addEventListener("click", () => {
+            const rows = setupTable.getElementsByTagName("tr");
+            for (let row of rows) {
+                const quantityInput = row.querySelector(".quantity-input");
+                quantityInput.value = 0;
+                row.querySelector("td:nth-child(4)").textContent = formatCurrency(0);
+            }
+            updateTotal();
+        });
+
+        // Inicializar a página
+        vehicleSelector.addEventListener("click", () => {
+            updateVehicleList('');
+        });
+    </script>
+</body>
+</html>
